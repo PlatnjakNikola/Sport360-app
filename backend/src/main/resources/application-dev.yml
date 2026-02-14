@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/service_app}
+    username: ${DB_USERNAME:service_app}
+    password: ${DB_PASSWORD:service_app}
+  jpa:
+    show-sql: false
+  flyway:
+    # Demo rows live outside db/migration so tests (which use the default
+    # location) start from a clean schema; dev applies schema + demo data.
+    locations: classpath:db/migration,classpath:db/demo
+
+# Dev profile: emails are logged to the console and cookie flags are relaxed
+# (wired up in Phase 2 — auth core).

@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: module-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  autoconfigure:
+    # We authenticate via a JWT cookie filter, not the default user — drop the
+    # auto-generated dev password and in-memory UserDetailsService.
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  jpa:
+    # No entities yet (Phase 1). 'validate' never touches the schema — Flyway owns it.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      # 20MB per image; allow up to 5 images plus form overhead in one request.
+      max-file-size: 20MB
+      max-request-size: 110MB
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  default-service-center-code: ${DEFAULT_SERVICE_CENTER_CODE:ZAGREB}
+  jwt:
+    secret: ${JWT_SECRET:dev-only-insecure-secret-change-me-please-0123456789}
+    access-ttl: 15m
+    refresh-ttl: 7d
+    mfa-ttl: 10m
+  cookie:
+    secure: false
+    same-site: Strict
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://localhost:5174
+  mfa:
+    code-ttl: 10m
+    max-attempts: 5
+    max-resends: 3
+  password-reset:
+    ttl: 1h
+  bootstrap:
+    admin:
+      email: ${APP_BOOTSTRAP_ADMIN_EMAIL:admin@local.com}
+      password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:Admin12345!}
+  cleanup:
+    cron: "0 30 3 * * *"
+  image:
+    storage-path: ${IMAGE_STORAGE_PATH:./data/images}
+    cleanup-cron: "0 0 3 * * *"
+    retention-days: 30

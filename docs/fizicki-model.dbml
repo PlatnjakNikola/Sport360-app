@@ -1,0 +1,224 @@
+// =====================================================================
+// Sport360 — fizicki model baze podataka (PostgreSQL)
+// Izvor: backend/src/main/resources/db/migration/V1__initial_schema.sql
+//
+// Kako dobiti sliku:
+//   1. Otvori https://dbdiagram.io  ->  "Create new diagram"
+//   2. Oznaci sav postojeci primjer u lijevom editoru i obrisi ga
+//   3. Zalijepi cijeli sadrzaj ove datoteke
+//   4. Diagram se sam iscrta; rasporedi tablice po zelji misom
+//   5. Export (gore desno)  ->  PNG (za Word) ili PDF (vektorski)
+// =====================================================================
+
+Table roles {
+  id smallint [pk]
+  code varchar(50) [not null, unique]
+}
+
+Table users {
+  id bigint [pk]
+  role_id smallint [not null, ref: > roles.id]
+  name varchar(150) [not null]
+  email varchar(255) [not null, unique]
+  password_hash varchar(72) [not null]
+  is_active boolean [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table clients {
+  user_id bigint [pk, ref: - users.id]
+  company_name varchar(255) [not null]
+  contact_phone varchar(50)
+  address text
+}
+
+Table technicians {
+  user_id bigint [pk, ref: - users.id]
+  phone varchar(50)
+  service_center_id bigint [not null, ref: > service_centers.id]
+}
+
+Table service_centers {
+  id bigint [pk]
+  code varchar(50) [not null, unique]
+  name varchar(255) [not null]
+  country varchar(100)
+  city varchar(100)
+  address text
+  is_active boolean [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table package_statuses {
+  id smallint [pk]
+  code varchar(50) [not null, unique]
+  name varchar(100) [not null]
+  sort_order smallint [not null, unique]
+}
+
+Table problem_types {
+  id smallint [pk]
+  code varchar(50) [not null, unique]
+  name varchar(255) [not null]
+  sort_order smallint [not null, unique]
+  is_active boolean [not null]
+}
+
+Table module_statuses {
+  id smallint [pk]
+  code varchar(50) [not null, unique]
+  name varchar(100) [not null]
+  sort_order smallint [not null, unique]
+  is_final boolean [not null]
+}
+
+Table packages {
+  id bigint [pk]
+  package_number varchar(100) [not null]
+  client_id bigint [ref: > clients.user_id]
+  is_internal boolean [not null]
+  service_center_id bigint [not null, ref: > service_centers.id]
+  current_status_id smallint [not null, ref: > package_statuses.id]
+  outbound_tracking_link varchar(2048)
+  return_tracking_link varchar(2048)
+  description text
+  note text
+  approx_quantity int
+  created_by_user_id bigint [not null, ref: > users.id]
+  received_at timestamptz
+  service_started_at timestamptz
+  service_completed_at timestamptz
+  shipped_at timestamptz
+  arrived_at timestamptz
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  deleted_at timestamptz
+}
+
+Table package_status_history {
+  id bigint [pk]
+  package_id bigint [not null, ref: > packages.id]
+  status_id smallint [not null, ref: > package_statuses.id]
+  changed_by_user_id bigint [not null, ref: > users.id]
+  changed_at timestamptz [not null]
+}
+
+Table modules {
+  id bigint [pk]
+  package_id bigint [not null, ref: > packages.id]
+  module_number varchar(150) [not null]
+  problem_type_id smallint [not null, ref: > problem_types.id]
+  current_status_id smallint [not null, ref: > module_statuses.id]
+  assigned_technician_id bigint [not null, ref: > technicians.user_id]
+  created_by_user_id bigint [not null, ref: > users.id]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  deleted_at timestamptz
+}
+
+Table module_status_history {
+  id bigint [pk]
+  module_id bigint [not null, ref: > modules.id]
+  status_id smallint [not null, ref: > module_statuses.id]
+  changed_by_user_id bigint [not null, ref: > users.id]
+  changed_at timestamptz [not null]
+}
+
+Table module_repairs {
+  module_id bigint [pk, ref: - modules.id]
+  technician_id bigint [not null, ref: > technicians.user_id]
+  decision_status_id smallint [not null, ref: > module_statuses.id]
+  pixels_repaired smallint [not null]
+  chips_replaced smallint [not null]
+  repair_note text
+  price decimal(10,2) [not null]
+  completed_at timestamptz [not null]
+}
+
+Table module_images {
+  id bigint [pk]
+  module_id bigint [not null, ref: > modules.id]
+  file_path varchar(2048) [not null]
+  uploaded_by_user_id bigint [not null, ref: > users.id]
+  created_at timestamptz [not null]
+}
+
+Table audit_logs {
+  id bigint [pk]
+  entity_type varchar(50) [not null]
+  entity_id bigint [not null]
+  action_type varchar(50) [not null]
+  changed_by_user_id bigint [not null, ref: > users.id]
+  old_value_json jsonb
+  new_value_json jsonb
+  created_at timestamptz [not null]
+}
+
+Table refresh_tokens {
+  id bigint [pk]
+  user_id bigint [not null, ref: > users.id]
+  token_hash varchar(255) [not null, unique]
+  expires_at timestamptz [not null]
+  created_at timestamptz [not null]
+  revoked_at timestamptz
+}
+
+Table password_reset_tokens {
+  id bigint [pk]
+  user_id bigint [not null, ref: > users.id]
+  token_hash varchar(255) [not null, unique]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  created_at timestamptz [not null]
+}
+
+Table technician_invite_tokens {
+  id bigint [pk]
+  created_by_user_id bigint [not null, ref: > users.id]
+  email varchar(255) [not null]
+  name varchar(150) [not null]
+  service_center_id bigint [not null, ref: > service_centers.id]
+  phone varchar(50)
+  token_hash varchar(255) [not null, unique]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  created_at timestamptz [not null]
+}
+
+Table client_invite_tokens {
+  id bigint [pk]
+  created_by_user_id bigint [not null, ref: > users.id]
+  email varchar(255) [not null]
+  contact_name varchar(150) [not null]
+  company_name varchar(255) [not null]
+  contact_phone varchar(50)
+  address text
+  token_hash varchar(255) [not null, unique]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  created_at timestamptz [not null]
+}
+
+Table mfa_codes {
+  id bigint [pk]
+  user_id bigint [not null, ref: > users.id]
+  code_hash varchar(255) [not null]
+  expires_at timestamptz [not null]
+  used_at timestamptz
+  attempts smallint [not null]
+  created_at timestamptz [not null]
+}
+
+Table notifications {
+  id bigint [pk]
+  user_id bigint [not null, ref: > users.id]
+  type varchar(50) [not null]
+  title varchar(255) [not null]
+  message text
+  entity_type varchar(50)
+  entity_id bigint
+  is_read boolean [not null]
+  created_at timestamptz [not null]
+}

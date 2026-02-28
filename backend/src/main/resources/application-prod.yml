@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    # Production must supply these via environment variables — no defaults.
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+app:
+  jwt:
+    # Required in production — no fallback.
+    secret: ${JWT_SECRET}
+  cookie:
+    secure: true
+  cors:
+    allowed-origins:
+      - ${FRONTEND_URL}
+  mail:
+    from: ${MAIL_FROM:no-reply@module-service.local}

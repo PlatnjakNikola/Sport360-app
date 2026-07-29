@@ -1,0 +1,10 @@
+# Test-scope shadow of the main application-dev.yml (test-classes precede
+# classes on the classpath, so this copy wins during tests).
+#
+# Tests run with the default (dev) profile; this copy deliberately does NOT
+# add the db/demo Flyway location, so integration tests start from a clean
+# schema (V1 + V2 only). The datasource comes from Testcontainers via
+# @ServiceConnection, so no datasource overrides are needed here.
+spring:
+  jpa:
+    show-sql: false

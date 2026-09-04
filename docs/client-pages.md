@@ -312,26 +312,3 @@ If pixels_repaired = 0 AND chips_replaced = 0:
 | repaired_waiting_shipment | Repaired — waiting shipment | 5 |
 | shipped_to_client | Shipped to client | 6 |
 | arrived | Arrived | 7 |
-
----
-
-# 9. What NOT to do
-
-- Do not show partial module data
-- Do not allow client to edit modules
-- Do not mix package and module logic
-- Do not allow invalid status transitions
-- Do not show technician names to client
-- Do not show module data before repaired_waiting_shipment
-- Do not use "Draft" (use "created")
-- Do not use "error type" (use "problem type")
-
----
-
-# 10. Final Notes
-
-- Client pages are the simplest of all three roles
-- Module visibility is the most critical business rule
-- Editable fields (tracking link, note, description) improve UX without breaking workflow
-- Notifications keep client informed without polling
-- All terminology is consistent with database, backend, technician, and admin documents

@@ -52,10 +52,12 @@ class MfaService(
         mfaCodeRepository.save(mfa)
     }
 
+    /** Counts only codes issued after [since], the MFA token timestamp, so codes from an earlier
+     *  login in the same window do not use up this attempt's budget. */
     @Transactional
-    fun resend(user: User) {
-        val recent = mfaCodeRepository.countByUserIdAndCreatedAtAfter(user.id, OffsetDateTime.now().minus(codeTtl))
-        if (recent > maxResends) throw RateLimitedException("Resend limit reached; try again later")
+    fun resend(user: User, since: OffsetDateTime) {
+        val recent = mfaCodeRepository.countByUserIdAndCreatedAtAfter(user.id, since)
+        if (recent >= maxResends) throw RateLimitedException("Resend limit reached; try again later")
         createAndSend(user)
     }
 

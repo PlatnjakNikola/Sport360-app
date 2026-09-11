@@ -1,12 +1,12 @@
 package com.sport360.moduleservice.email
 
 import org.slf4j.LoggerFactory
-import org.springframework.context.annotation.Profile
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 
-/** Dev email impl: writes the message to the console instead of sending it. */
+/** Default email impl: writes the message to the console instead of sending it. */
 @Service
-@Profile("dev")
+@ConditionalOnProperty(name = ["app.mail.mode"], havingValue = "log", matchIfMissing = true)
 class LoggingEmailService : EmailService {
 
     private val log = LoggerFactory.getLogger(javaClass)

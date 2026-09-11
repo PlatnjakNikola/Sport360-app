@@ -23,4 +23,5 @@ app:
     allowed-origins:
       - ${FRONTEND_URL}
   mail:
+    mode: smtp
     from: ${MAIL_FROM:no-reply@module-service.local}

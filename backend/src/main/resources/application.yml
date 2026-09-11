@@ -45,6 +45,9 @@ app:
     allowed-origins:
       - http://localhost:5173
       - http://localhost:5174
+  mail:
+    # log = kod se ispisuje u konzolu, smtp = kod se stvarno salje e-postom
+    mode: ${MAIL_MODE:log}
   mfa:
     code-ttl: 10m
     max-attempts: 5

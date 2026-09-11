@@ -9,10 +9,15 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.stereotype.Service
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.Date
 
 /** Claims carried by an access token. */
 data class AccessClaims(val userId: Long, val role: String)
+
+/** Claims carried by the MFA token. issuedAt scopes the resend budget to a single login attempt. */
+data class MfaClaims(val userId: Long, val issuedAt: OffsetDateTime)
 
 /** Issues and parses the stateless access token and the short-lived MFA token (jjwt, HS256). */
 @Service
@@ -53,10 +58,11 @@ class JwtService(props: AppProperties) {
         return AccessClaims(userId, role)
     }
 
-    fun parseMfaToken(token: String): Long {
+    fun parseMfaToken(token: String): MfaClaims {
         val claims = parse(token)
         if (claims["typ"] != TYPE_MFA) throw UnauthorizedException("Invalid login session")
-        return claims.subject.toLong()
+        val issuedAt = claims.issuedAt?.toInstant() ?: throw UnauthorizedException("Invalid login session")
+        return MfaClaims(claims.subject.toLong(), issuedAt.atOffset(ZoneOffset.UTC))
     }
 
     private fun parse(token: String) =

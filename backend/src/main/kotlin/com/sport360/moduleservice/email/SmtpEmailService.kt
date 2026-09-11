@@ -1,14 +1,14 @@
 package com.sport360.moduleservice.email
 
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Profile
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
-/** Prod email impl: sends via the configured SMTP provider (JavaMailSender). */
+/** SMTP email impl: sends via the configured provider (JavaMailSender). */
 @Service
-@Profile("prod")
+@ConditionalOnProperty(name = ["app.mail.mode"], havingValue = "smtp")
 class SmtpEmailService(
     private val mailSender: JavaMailSender,
     @Value("\${app.mail.from:no-reply@module-service.local}") private val from: String,

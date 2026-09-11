@@ -46,7 +46,7 @@ class AuthService(
 
     @Transactional
     fun verifyMfa(mfaToken: String, code: String, response: HttpServletResponse): LoginResponse {
-        val userId = jwtService.parseMfaToken(mfaToken)
+        val userId = jwtService.parseMfaToken(mfaToken).userId
         val user = userRepository.findById(userId).orElseThrow { UnauthorizedException("Invalid login session") }
         if (!user.isActive) throw UnauthorizedException("Account is inactive")
         mfaService.verify(userId, code)
@@ -56,9 +56,9 @@ class AuthService(
 
     @Transactional
     fun resendMfa(mfaToken: String) {
-        val userId = jwtService.parseMfaToken(mfaToken)
-        val user = userRepository.findById(userId).orElseThrow { UnauthorizedException("Invalid login session") }
-        mfaService.resend(user)
+        val claims = jwtService.parseMfaToken(mfaToken)
+        val user = userRepository.findById(claims.userId).orElseThrow { UnauthorizedException("Invalid login session") }
+        mfaService.resend(user, claims.issuedAt)
     }
 
     fun me(userId: Long): UserProfileResponse =

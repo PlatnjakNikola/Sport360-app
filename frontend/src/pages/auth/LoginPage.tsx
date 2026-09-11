@@ -79,7 +79,7 @@ export function LoginPage() {
           </button>
         }
       >
-        <form onSubmit={submitCode} className="space-y-4" noValidate>
+        <form key="mfa" onSubmit={submitCode} className="space-y-4" noValidate>
           <div>
             <label className={labelClass} htmlFor="code">
               Code
@@ -89,7 +89,7 @@ export function LoginPage() {
               inputMode="numeric"
               autoComplete="one-time-code"
               className={inputClass}
-              placeholder="123456"
+              placeholder="Code"
               {...codeForm.register('code')}
             />
             {codeForm.formState.errors.code && (
@@ -114,7 +114,7 @@ export function LoginPage() {
         </Link>
       }
     >
-      <form onSubmit={submitCredentials} className="space-y-4" noValidate>
+      <form key="credentials" onSubmit={submitCredentials} className="space-y-4" noValidate>
         <div>
           <label className={labelClass} htmlFor="email">
             Email
